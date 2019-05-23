@@ -5,11 +5,11 @@
 
 The new format for the SAT was released in March 2016 and since then, we have collected data on the scores from each state in US, and their corresponding participation rates in 2017. Based on the general statistics of the said given data, a rough estimate on each state's performance and their participation rate will be used to determine how federal funding shall be allocated into each state, so as to increase the education standards of the whole country.
 
+The problem defined in this project therefore be looking at which specific subjects from either SAT or ACT test, see which subjects have a poor than average score for fiscal funding to be implemented to help improve education levels. Furthermore, we seek to also define how well we can use the test scores to predict future test scores.
+
 The new format for the SAT was released in March 2016 and since then, we have collected data on the scores from each state in US, and their corresponding participation rates in 2017. Based on the general statistics of the said given data, a rough estimate on each state's performance and their participation rate will be used to determine how federal funding shall be allocated into each state, so as to increase the education standards of the whole country.
 
 ## Executive Summary
-
-If you want to, it's great to use relative links to direct your audience to various sections of a notebook. **HERE'S A DEMONSTRATION WITH THE CURRENT SECTION HEADERS**:
 
 ### Contents:
 - [2017 Data Import & Cleaning](#Data-Import-and-Cleaning)
@@ -31,6 +31,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import scipy.stats as stats
 
 %matplotlib inline
 ```
@@ -776,7 +777,7 @@ act17_df.head()
     <tr>
       <th>0</th>
       <td>National</td>
-      <td>60%</td>
+      <td>0.60</td>
       <td>20.3</td>
       <td>20.7</td>
       <td>21.4</td>
@@ -786,7 +787,7 @@ act17_df.head()
     <tr>
       <th>1</th>
       <td>Alabama</td>
-      <td>100%</td>
+      <td>1.00</td>
       <td>18.9</td>
       <td>18.4</td>
       <td>19.7</td>
@@ -796,7 +797,7 @@ act17_df.head()
     <tr>
       <th>2</th>
       <td>Alaska</td>
-      <td>65%</td>
+      <td>0.65</td>
       <td>18.7</td>
       <td>19.8</td>
       <td>20.4</td>
@@ -806,7 +807,7 @@ act17_df.head()
     <tr>
       <th>3</th>
       <td>Arizona</td>
-      <td>62%</td>
+      <td>0.62</td>
       <td>18.6</td>
       <td>19.8</td>
       <td>20.1</td>
@@ -816,7 +817,7 @@ act17_df.head()
     <tr>
       <th>4</th>
       <td>Arkansas</td>
-      <td>100%</td>
+      <td>1.00</td>
       <td>18.9</td>
       <td>19.0</td>
       <td>19.7</td>
@@ -1261,8 +1262,6 @@ calc_stdev(final['sat_17_total'])
 sd = {x:calc_stdev(final[x]) for x in final if x!='State'}
 ```
 
-Do your manually calculated standard deviations match up with the output from pandas `describe`? What about numpy's `std` method?
-
 
 ```python
 sd
@@ -1294,8 +1293,10 @@ sd
 
 
 
+Do your manually calculated standard deviations match up with the output from pandas `describe`? What about numpy's `std` method?
+
 Answer: <br>
-No, the standard deviations do not match up. However, Numpy's std method also matches up. This is because the formula above does not correct for bessel's correction as the estimation of the population variance contains bias. Bessel's correction partially corrects the bias in the estimation of the population standard deviation by using n-1 instead of n instances only in pandas package.
+No, the standard deviations do not match up. However, Numpy's std method also matches up. This is because the formula above does not correct for bessel's correction as the estimation of the population variance contains bias. Bessel's correction partially corrects the bias in the estimation of the population standard deviation by using n-1 instead of n instances only in pandas package. For numpy to correct for bessel's correction, we need to include a parameter, (ddof = 1)
 
 #### Investigate trends in the data
 Using sorting and/or masking (along with the `.head` method to not print our entire dataframe), consider the following questions:
@@ -2230,7 +2231,7 @@ subplot_scatter(final.sat_17_total, final.act_17_composite,'SAT vs. ACT total/co
 ```
 
 
-![png](images/(output_102_0.png)
+![png](images/output_102_0.png)
 
 
 
@@ -2302,7 +2303,7 @@ sns.boxplot(data = final[['act_18_english', 'act_18_math', 'act_18_reading', 'ac
 sns.boxplot(data = final[['sat_18_erw', 'sat_18_math', 'sat_17_erw', 'sat_17_math']],\
             ax=ax[1, 1]).set_title('2017 and 2018 SAT individual scores')
 sns.boxplot(data = final[['sat_18_total', 'sat_17_total']],\
-            ax=ax[1, 0],width = 0.2).set_title('2017 and 2018 SAT total scores')
+            ax=ax[1, 0],width = 0.8).set_title('2017 and 2018 SAT total scores')
 
 # SAT and ACT participation rates
 sns.boxplot(data = final[['sat_17_participation', 'sat_18_participation', 'act_17_participation', 'act_18_participation']],\
@@ -2316,6 +2317,41 @@ figure.tight_layout() ## this will pad your figures slightly
 ![png](images/output_107_0.png)
 
 
+#### Feel free to do additional plots below
+*(do research and choose your own chart types & variables)*
+
+Are there any additional trends or relationships you haven't explored? Was there something interesting you saw that you'd like to dive further into? It's likely that there are a few more plots you might want to generate to support your narrative and recommendations that you are building toward. **As always, make sure you're interpreting your plots as you go**.
+
+
+```python
+subplot_histograms(final[["act_18_composite",'act_18_science','act_18_math','act_18_english','act_18_reading']],
+                  ["2018 ACT composite scores",'2018 ACT science scores','2018 ACT participation rates','2018 ACT English scores','2018 ACT reading scores'],
+                  ["Percentage in float","Percentage in float","Percentage in float","Percentage in float","Percentage in float"])
+```
+
+
+![png](images/output_109_0.png)
+
+
+
+```python
+subplot_histograms(final[["act_17_composite",'act_17_science','act_17_math','act_17_english','act_17_reading']],
+                  ["2017 ACT composite scores",'2017 ACT science scores','2017 ACT participation rates','2017 ACT English scores','2017 ACT reading scores'],
+                  ["Percentage in float","Percentage in float","Percentage in float","Percentage in float","Percentage in float"])
+```
+
+
+![png](images/output_110_0.png)
+
+
+#### (Optional): Using Tableau, create a choropleth map for each variable using a map of the US. 
+
+Save this plot as an image file in an images directory, provide a relative path, and insert the image into notebook in markdown.
+
+
+```python
+
+```
 
 ## Descriptive and Inferential Statistics
 
@@ -2331,305 +2367,24 @@ For each variable in your data, summarize the underlying distributions (in words
  - Be thorough in your verbal description of these distributions.
  - Be sure to back up these summaries with statistics.
 
-
-```python
-final.describe().transpose()
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>count</th>
-      <th>mean</th>
-      <th>std</th>
-      <th>min</th>
-      <th>25%</th>
-      <th>50%</th>
-      <th>75%</th>
-      <th>max</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>act_18_participation</th>
-      <td>51.0</td>
-      <td>0.616471</td>
-      <td>0.340810</td>
-      <td>0.07</td>
-      <td>0.285</td>
-      <td>0.66</td>
-      <td>1.000</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>act_18_composite</th>
-      <td>51.0</td>
-      <td>21.486275</td>
-      <td>2.106278</td>
-      <td>17.70</td>
-      <td>19.950</td>
-      <td>21.30</td>
-      <td>23.550</td>
-      <td>25.6</td>
-    </tr>
-    <tr>
-      <th>act_18_english</th>
-      <td>51.0</td>
-      <td>20.988235</td>
-      <td>2.446356</td>
-      <td>16.60</td>
-      <td>19.100</td>
-      <td>20.20</td>
-      <td>23.700</td>
-      <td>26.0</td>
-    </tr>
-    <tr>
-      <th>act_18_math</th>
-      <td>51.0</td>
-      <td>21.125490</td>
-      <td>2.035765</td>
-      <td>17.80</td>
-      <td>19.400</td>
-      <td>20.70</td>
-      <td>23.150</td>
-      <td>25.2</td>
-    </tr>
-    <tr>
-      <th>act_18_reading</th>
-      <td>51.0</td>
-      <td>22.015686</td>
-      <td>2.167245</td>
-      <td>18.00</td>
-      <td>20.450</td>
-      <td>21.60</td>
-      <td>24.100</td>
-      <td>26.1</td>
-    </tr>
-    <tr>
-      <th>act_18_science</th>
-      <td>51.0</td>
-      <td>21.345098</td>
-      <td>1.870114</td>
-      <td>17.90</td>
-      <td>19.850</td>
-      <td>21.10</td>
-      <td>23.050</td>
-      <td>24.9</td>
-    </tr>
-    <tr>
-      <th>sat_18_participation</th>
-      <td>51.0</td>
-      <td>0.466275</td>
-      <td>0.380142</td>
-      <td>0.02</td>
-      <td>0.045</td>
-      <td>0.52</td>
-      <td>0.795</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>sat_18_erw</th>
-      <td>51.0</td>
-      <td>567.294118</td>
-      <td>45.317676</td>
-      <td>497.00</td>
-      <td>535.000</td>
-      <td>552.00</td>
-      <td>616.500</td>
-      <td>643.0</td>
-    </tr>
-    <tr>
-      <th>sat_18_math</th>
-      <td>51.0</td>
-      <td>557.254902</td>
-      <td>48.887562</td>
-      <td>480.00</td>
-      <td>521.500</td>
-      <td>547.00</td>
-      <td>600.500</td>
-      <td>655.0</td>
-    </tr>
-    <tr>
-      <th>sat_18_total</th>
-      <td>51.0</td>
-      <td>1124.666667</td>
-      <td>93.867069</td>
-      <td>977.00</td>
-      <td>1062.500</td>
-      <td>1099.00</td>
-      <td>1220.000</td>
-      <td>1298.0</td>
-    </tr>
-    <tr>
-      <th>act_17_participation</th>
-      <td>51.0</td>
-      <td>0.652549</td>
-      <td>0.321408</td>
-      <td>0.08</td>
-      <td>0.310</td>
-      <td>0.69</td>
-      <td>1.000</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>act_17_english</th>
-      <td>51.0</td>
-      <td>20.931373</td>
-      <td>2.353677</td>
-      <td>16.30</td>
-      <td>19.000</td>
-      <td>20.70</td>
-      <td>23.300</td>
-      <td>25.5</td>
-    </tr>
-    <tr>
-      <th>act_17_math</th>
-      <td>51.0</td>
-      <td>21.182353</td>
-      <td>1.981989</td>
-      <td>18.00</td>
-      <td>19.400</td>
-      <td>20.90</td>
-      <td>23.100</td>
-      <td>25.3</td>
-    </tr>
-    <tr>
-      <th>act_17_reading</th>
-      <td>51.0</td>
-      <td>22.013725</td>
-      <td>2.067271</td>
-      <td>18.10</td>
-      <td>20.450</td>
-      <td>21.80</td>
-      <td>24.150</td>
-      <td>26.0</td>
-    </tr>
-    <tr>
-      <th>act_17_science</th>
-      <td>51.0</td>
-      <td>21.450980</td>
-      <td>1.739353</td>
-      <td>18.20</td>
-      <td>19.950</td>
-      <td>21.30</td>
-      <td>23.200</td>
-      <td>24.9</td>
-    </tr>
-    <tr>
-      <th>act_17_composite</th>
-      <td>51.0</td>
-      <td>21.519608</td>
-      <td>2.020695</td>
-      <td>17.80</td>
-      <td>19.800</td>
-      <td>21.40</td>
-      <td>23.600</td>
-      <td>25.5</td>
-    </tr>
-    <tr>
-      <th>sat_17_participation</th>
-      <td>51.0</td>
-      <td>0.398039</td>
-      <td>0.352766</td>
-      <td>0.02</td>
-      <td>0.040</td>
-      <td>0.38</td>
-      <td>0.660</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>sat_17_erw</th>
-      <td>51.0</td>
-      <td>569.117647</td>
-      <td>45.666901</td>
-      <td>482.00</td>
-      <td>533.500</td>
-      <td>559.00</td>
-      <td>613.000</td>
-      <td>644.0</td>
-    </tr>
-    <tr>
-      <th>sat_17_math</th>
-      <td>51.0</td>
-      <td>556.882353</td>
-      <td>47.121395</td>
-      <td>468.00</td>
-      <td>523.500</td>
-      <td>548.00</td>
-      <td>599.000</td>
-      <td>651.0</td>
-    </tr>
-    <tr>
-      <th>sat_17_total</th>
-      <td>51.0</td>
-      <td>1126.000000</td>
-      <td>92.487621</td>
-      <td>950.00</td>
-      <td>1055.500</td>
-      <td>1106.00</td>
-      <td>1211.500</td>
-      <td>1295.0</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
 Answers:<br>
 ### 2018 ACT
 ___
-#### act_18_participation: 
-The distribution is negatively skewed as the median (0.66) is further right than the mean (0.61). Thus,  most states actually have full participation of their high school graduates as 75percentile is 1.0 (max).   <br>
-#### act_18_composite:  
-Test <br>
-#### act_18_english: 
-test <br>
-#### act_18_math: 
-test <br>
-#### act_18_reading:
-test <br>
-#### act_18_science:
-test <br>
+The median scores of all ACT subjects, including the composite score is estimate similar (21.3, 20.2, 20.7, 21.6 and 21.1), average = 20.94. They have relatively similar interquartile range too, as from the boxplot, their colored boxes covers around the same score interval (between 19 to 24). The English subject however, has the largest range as seen from the boxplot, and their interquartile range is also largest. The spread of English scores has more variance than the other subjects. The 2018 ACT reading subject scores however do show a slightly tighter and higher interquartile range. Furthermore, all variables in 2018 ACT have their distribution approximately symmetric as their skewness is close to 0, however we do spot that 2018 ACT English have a stronger skew as the median is very must lower. While 2018 ACT English and Science seems to be bimodal, the rest are of unimodel shape. There does not seem to be any outliers in the 2018 variables for ACT.
 ___
 ### 2018 SAT
 ___
-sat_18_participation:   <br>
-sat_18_erw:   <br>
-sat_18_math:   <br>
-sat_18_total:   <br>
+Comparing 2018 SAT ERW and Math scores, ERW seems to be performing better than Math on average (567 to 557). Although this may be true, the spread of 2018 SAT Math scores seems to have a lot of variance on the upper quartile range as seen from the boxplot on SAT scores. 2018 SAT ERW scores are also to be slightly more positively skewed, as shown by the boxplot with the median line being lower. Overall, there are no outliers in the variables for 2018 SAT, however we do note that the total scores for 2018 SAT seems to be tune towards positive skewness, meaning that on average, more people are less than average.
 ___
 ### 2017 ACT
-act_17_participation:   <br>
-act_17_english:   <br>
-act_17_math:   <br>
-act_17_reading:   <br>
-act_17_science:   <br>
-act_17_composite:   <br>
+For 2017 ACT, the mean and median of all subjects and composite scores are close to each other, with 2017 ACT Reading slightly higher than the rest as shown in the boxplot of reading higher than the rest. 2017 ACT Science seems to have the lowest interquartile range amongst all, while the 2017 ACT English has the highest. All distributions in 2017 ACT test seem to be approximately symmertric as their skewness is relatively close to 0. There is no outliers in 2017 ACT test results.
 ___
 ### 2017 SAT
-sat_17_participation :   <br>
-sat_17_erw:   <br>
-sat_17_math:   <br>
-sat_17_total:   <br>
+In the 2017 SAT variables, we see that 2017 Math SAT scores are highly variable from the boxplot range. 2017 ERW has a smaller interquartile range than Math. Both variables seems to be positively skewed where the median is lower on the interquartile range. There are no outliers overall. 
+
+### Overall 2017 and 2018 test participation rates
+It can be seen from the boxplot that ACT participation rates are higher than SAT participation rates. The interquartile range for ACT in both years covers mostly 30% to 100% participation rate, while for SAT, it is more from 5% to 60% participation rate. All distribution of participation rates for SAT and ACT seems symmetrical except for 2018 SAT participation, where we can see that the median is slightly above the mean. As compared to 2017, more states are have increased participation rates in SAT.
+
 
 #### We generally assuming that data we sample from a population will be normally distributed. Do we observe this trend?
 
@@ -2679,7 +2434,34 @@ On the other hand, the range of scores for both test is largely different, as SA
 
 ```python
 # Code:
+#H_null is that there is no difference in level of participation between SAT and ACT
+#H_alt is that there is a difference in level of participation between SAT and ACT
+stats.ttest_ind(final.sat_17_p 7_participation)
+
+#t = -3.81, pvalue = 0.000241
+#We reject null hypothesis, as there is a difference in level of participation in SAT and ACT in 2017.
+
+stats.ttest_ind(final.sat_18_participation, final.act_18_participation)
+#We reject null hypothesis, as there is a difference in level of participation in SAT and ACT in 2018.
+
+#t = -2.1, pvalue = 0.0381
+#On a side note, a 1-tail t-test would show that we cannot reject null hypothesis (pvalue < 0.025), if comparing SAT and ACT in 2018;
+#If Null hypothesis is that ACT participation is greater than SAT participation,
+#alt hypothesis is that ACT participation is not greater than or equal to SAT participation
+
+stats.ttest_ind(final.act_17_participation, final.act_18_participation)
+stats.ttest_ind(final.sat_17_participation, final.sat_18_participation)
+
+#for both, we cannot reject null hypothesis as p value > 0.05.
+#thus, there is no statistical difference between 2017 ACT/SAT and 2018 ACT/SAT participation.
 ```
+
+
+
+
+    Ttest_indResult(statistic=-0.9396299045734352, pvalue=0.34967156915092745)
+
+
 
 ## Outside Research
 
